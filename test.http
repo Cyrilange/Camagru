@@ -36,3 +36,13 @@ Content-Type: application/json
     "token": "token received by mail taken in the link",
     "password": "NewPass123!"
 }
+
+### Update user
+PUT https://localhost:8443/api/user/update
+Content-Type: application/json
+
+{
+    "username": "newusername",
+    "email": "newemail@test.com",
+    "password": "NewPass123!"
+}

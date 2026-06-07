@@ -1,4 +1,6 @@
 const express = require('express')
+const bcrypt = require('bcryptjs')
+const db = require('../database')
 const { isAuth, validatePassword } = require('../middlewares/auth')
 const router = express.Router()
 
@@ -17,3 +19,5 @@ router.put('/update' , isAuth, validatePassword, async(req, res) => {
 		res.status(500).json({ error: err.message })
 	}
 })
+
+module.exports = router
