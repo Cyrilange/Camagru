@@ -49,3 +49,6 @@ Content-Type: application/json
 
 ### Gallery
 GET https://localhost:8443/api/gallery?page=1
+
+### Overlays
+GET https://localhost:8443/api/editor/overlays
