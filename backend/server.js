@@ -21,6 +21,7 @@ app.use(session({
 }))
 app.use('/api/auth', require('./routes/auth'))
 app.use('/api/user', require('./routes/user'))
+app.use('/api/gallery', require('./routes/gallery'))
 
 app.get('/h', (req, res) => {
 	res.json({ status: 'ok' });

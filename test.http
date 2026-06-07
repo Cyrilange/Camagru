@@ -46,3 +46,6 @@ Content-Type: application/json
     "email": "newemail@test.com",
     "password": "NewPass123!"
 }
+
+### Gallery
+GET https://localhost:8443/api/gallery?page=1
