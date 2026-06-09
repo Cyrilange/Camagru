@@ -1,5 +1,23 @@
 # Camagru
 
+## use
+
+## DOWNLOAD
+
+git clone https://github.com/Cyrilange/Camagru.git <\NULL or name >
+
+### LINUX
+
+make 
+make clean
+make fclean
+make re
+
+
+### WINDOWS / LINUX / MC OS
+
+docker 
+
 ## Stack
 - Node.js + Express (server side)
 - MariaDB + mysql2

@@ -31,4 +31,18 @@ async function sendResetPassword(email, token) {
     })
 }
 
-module.exports = { sendVerification, sendResetPassword }
+
+async function sendCommentNotification(email, imageId, content) {
+    await transporter.sendMail({
+        from: process.env.ET_SERNAME,
+        to: email,
+        subject: 'New comment on your image',
+        html: `
+            <p>Your image received a new comment:</p>
+            <p><b>${content}</b></p>
+            <p>Image ID: ${imageId}</p>
+        `
+    })
+}
+
+module.exports = { sendVerification, sendResetPassword , sendCommentNotification}

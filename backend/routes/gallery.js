@@ -1,6 +1,7 @@
 const express = require('express')
 const db = require('../database')
 const { isAuth, validatePassword } = require('../middlewares/auth')
+const { sendCommentNotification } = require('../mailer');
 const router = express.Router()
 
 router.get('/', async (req, res) => {
@@ -62,6 +63,21 @@ router.post('/:id/comment', isAuth, async (req, res) => {
 			'INSERT INTO comments (user_id, image_id, content) VALUES (?, ?, ?)',
 			[userId, image, content]
 		)
+		const [rows] = await db.execute(
+            'SELECT user_id FROM images WHERE id = ?',
+            [image]
+        );
+		const ownerId = rows[0]?.user_id;
+		if (ownerId && ownerId !== userId) {
+			const [userRows] = await db.execute(
+                'SELECT email, notify_comments FROM users WHERE id = ?',
+                [ownerId]
+            );
+            const owner = userRows[0];
+            if (owner?.notify_comments) {
+                await sendCommentNotification(owner.email, image, content);
+            }
+		}
 		res.json({ success: true, message: 'comment added' })
 
 	} catch(err) {

@@ -10,43 +10,31 @@ services:
       db:
         condition: service_healthy
 
-  frontend:
-    build: ./frontend
-    env_file:
-      - ./backend/.env
-    depends_on:
-      - backend
-    expose:
-      - "3000"
-    restart: unless-stopped
-
-  nginx:
-    image: nginx:latest
-    ports:
-      - "8443:443"
-      - "8080:80"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./nginx/certs:/etc/nginx/certs
-    depends_on:
-      - backend
-      - frontend
-    restart: unless-stopped
-
   db:
     image: mariadb:11
-    ports:
-      - "3307:3306"
     env_file:
       - ./backend/.env
     volumes:
       - db_data:/var/lib/mysql
       - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    restart: unless-stopped
     healthcheck:
       test: ["CMD", "healthcheck.sh", "--connect"]
       interval: 5s
       timeout: 5s
       retries: 10
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./frontend:/var/www/frontend:ro
+      - ./backend/uploads:/var/www/uploads:ro
+    depends_on:
+      - backend
+    restart: unless-stopped
 
 volumes:
   db_data:
