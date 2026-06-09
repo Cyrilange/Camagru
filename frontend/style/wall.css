@@ -20,7 +20,7 @@ body {
   align-items: center;
 }
 
-#logout {
+button {
   text-align: right;
   cursor: pointer;
   margin-right: 0.2rem;
@@ -30,11 +30,11 @@ body {
   display: inline-block;
 }
 
-#logout:active {
+button:active {
   animation: likePop 0.4s ease-in-out;
 }
 
-#logout:hover {
+button:hover {
   transform: scale(1.1);
 }
 

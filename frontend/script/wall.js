@@ -1,3 +1,4 @@
+//function for the wall
 async function loadPosts() {
 	const res = await fetch("/api/gallery/images");
 	const posts = await res.json();
@@ -13,7 +14,7 @@ async function loadPosts() {
 		  <div class="username">${post.username}</div>
 		</div>
   
-		<img src="${post.image}" />
+		<img src="${post.filename}" />
   
 		<div class="actions">
 		  <p>🩷 ${post.likes}</p>
@@ -23,7 +24,7 @@ async function loadPosts() {
 	`).join("");
   }
 
-
+//function to log out
   async function logout() {
 	try {
 	  const res = await fetch("/api/auth/logout", {
@@ -39,17 +40,37 @@ async function loadPosts() {
 	  console.error(err);
 	}
   }
+  
 
-
-  async function login() {
-	
+  //function to check user auth
+  async function updateAuthUI() {
+	const res = await fetch("/api/user/me", {
+	  credentials: "include"
+	});
+  
+	const loginBtn = document.getElementById("login-btn");
+	const logoutBtn = document.getElementById("logout");
+  
+	if (!res.ok) {
+	  loginBtn.style.display = "inline-block";
+	  logoutBtn.style.display = "none";
+	  return;
+	}
+  
+	loginBtn.style.display = "none";
+	logoutBtn.style.display = "inline-block";
+  
+	const user = await res.json();
+	console.log(user);
   }
 
-  async function register() {
 
+  //function to launch
+  async function init() {
+	await updateAuthUI();
+	await loadPosts();
   }
   
-  logout()
-  loadPosts();
+  init();
 
  
