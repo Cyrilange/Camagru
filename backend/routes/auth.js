@@ -113,30 +113,38 @@ router.get('/verify', async (req, res) => {
   }
 })
 
-router.post('/reset-password',validatePassword,  async (req, res) => {
-  const {token, password} = req.body
-  if(!token || !password)
-      return res.status(404).json({error: 'password or token issue'})
+router.post('/reset-password', validatePassword, async (req, res) => {
+  const { token, password } = req.body;
+
+  if (!token || !password) {
+    return res.status(400).json({ error: 'missing token or password' });
+  }
 
   try {
-    const [rows] = await db.execute('SELECT * FROM users WHERE reset_token = ?', [token])
-    const user = rows[0]
-    if (!user)
-        return res.status(404).json({ error: 'Invalid token' })
-    
-    const salt = await bcrypt.genSalt(12)
-    const password_hash = await bcrypt.hash(password, salt)
+    const [rows] = await db.execute(
+      'SELECT * FROM users WHERE reset_token = ?',
+      [token]
+    );
+
+    const user = rows[0];
+
+    if (!user) {
+      return res.status(400).json({ error: 'invalid token' });
+    }
+
+    const salt = await bcrypt.genSalt(12);
+    const password_hash = await bcrypt.hash(password, salt);
 
     await db.execute(
       'UPDATE users SET password_hash = ?, reset_token = NULL WHERE id = ?',
       [password_hash, user.id]
-  )
-  
-  res.json({ success: true, message: 'Password updated' })
-  } catch(err) {
-    res.status(500).json({error: err.message})
-  }
-})
+    );
 
+    res.json({ success: true, message: 'Password updated' });
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 module.exports = router

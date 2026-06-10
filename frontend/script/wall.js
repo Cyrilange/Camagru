@@ -44,7 +44,7 @@ async function loadPosts() {
 
   //function to check user auth
   async function updateAuthUI() {
-	const res = await fetch("/api/user/me", {
+	const res = await fetch("/api/auth/me", {
 	  credentials: "include"
 	});
   

@@ -3,7 +3,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link rel="stylesheet" href="./style/login.css">
+	<link rel="stylesheet" href="style/login.css">
 	<title>Login</title>
 </head>
 <body>
@@ -19,6 +19,16 @@
 		Not registered?
 		<a href="/register.html">Create an account</a>
 	  </p>
+	  <div id="login-error" style="margin-top:10px; color:#ff4d4d;"></div>
+
+	  <form id="forgot-form">
+		<input type="email" name="email" placeholder="Your email" required>
+		<p>You forgot your password ?</p>
+		<button type="submit">Send reset link</button>
+	  </form>
+	  
+	  <p id="msg"></p>
+	  <script src="script/login.js"></script>
 	
 </body>
 </html>

@@ -3,7 +3,7 @@ COMPOSE_FILE = docker-compose.yml
 all: up
 
 up:
-	@docker compose -f $(COMPOSE_FILE) up --build -d
+	@docker compose -f $(COMPOSE_FILE) up --build -d 
 	@echo ""
 	@echo "Camagru is up!"
 	@echo "Local: http://localhost"
