@@ -3,15 +3,19 @@ const nodemailer = require('nodemailer')
 
 const transporter = nodemailer.createTransport({
     host: process.env.ET_NAME,
-    port: process.env.ET_PORT,
+    port: 587,
+    secure: false,
     auth: {
         user: process.env.ET_SERNAME,
         pass: process.env.ET_PASSWORD
+    },
+    tls: {
+        rejectUnauthorized: false
     }
 })
 
-async function sendVerification(email, token) {
-    const link = `https://localhost:8443/api/auth/verify?token=${token}`
+async function sendVerification(email, token, appUrl) {
+    const link = `${appUrl}/api/auth/verify?token=${token}`
     
     await transporter.sendMail({
         from: process.env.ET_SERNAME,

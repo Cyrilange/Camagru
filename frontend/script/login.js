@@ -19,9 +19,9 @@ document.getElementById("login-form").addEventListener("submit", async (e) => {
 	const form = new FormData(e.target);
   
 	const data = {
-	  identifier: form.get("username") || form.get("email"),
-	  password: form.get("password")
-	};
+		email: form.get("email"),
+		password: form.get("password")
+	}
   
 	const res = await fetch("/api/auth/login", {
 	  method: "POST",

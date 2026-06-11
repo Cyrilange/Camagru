@@ -1,6 +1,8 @@
+
+
 //function for the wall
 async function loadPosts() {
-	const res = await fetch("/api/gallery/images");
+	const res = await fetch("/api/gallery");
 	const posts = await res.json();
   
 	const feed = document.querySelector(".feed");
@@ -60,8 +62,9 @@ async function loadPosts() {
 	loginBtn.style.display = "none";
 	logoutBtn.style.display = "inline-block";
   
-	const user = await res.json();
-	console.log(user);
+	const user = await res.json()
+	const usernameEl = document.getElementById("username")
+	if (usernameEl) usernameEl.textContent = user.username
   }
 
 

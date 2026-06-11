@@ -2,7 +2,7 @@ router.get('/verify', async (req, res) => {
 	const { token } = req.query;
   
 	try {
-	  return res.redirect('/verified.html');
+	  return res.redirect('/wall.html');
   
 	} catch (err) {
 

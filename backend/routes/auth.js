@@ -24,7 +24,8 @@ router.post('/register', validatePassword, async (req, res) => {
       [username, email, password_hash, token]
     )
 
-    await sendVerification(email, token)
+    const appUrl = `${req.protocol}://${req.get('x-forwarded-host') || req.get('host')}`
+    await sendVerification(email, token, appUrl)
 
     res.json({ success: true, message: 'Account created, check your email' })
   } catch (err) {
@@ -106,7 +107,7 @@ router.get('/verify', async (req, res) => {
         return res.status(404).json({ error: 'Invalid token' })
     
     await db.execute('UPDATE users SET is_verified = 1, verify_token = NULL WHERE id = ?', [user.id])
-    
+    res.redirect('/login.html')
     res.json({ success: true, message: 'Account verified' })
   } catch(err) {
     res.status(500).json({error: err.message})

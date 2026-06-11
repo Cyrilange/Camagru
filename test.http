@@ -1,5 +1,5 @@
 ### Register
-POST https://localhost:8443/api/auth/register
+POST https://localhost/api/auth/register
 Content-Type: application/json
 
 {

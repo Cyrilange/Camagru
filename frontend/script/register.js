@@ -19,15 +19,11 @@ document.getElementById("register-form").addEventListener("submit", async (e) =>
   
 	if (res.ok) {
 		const goodDiv = document.getElementById("good-message");
-		goodDiv.innerHTML = "Erreur lors de l'inscription. Vérifie tes informations.";
-	  window.location.href = "/login.html";
+		goodDiv.innerHTML = "Account created! Check your email to verify your account.";
 	} else {
 		const errorDiv = document.getElementById("error-message");
-
 		if (errorDiv) {
 			errorDiv.innerHTML = "Erreur lors de l'inscription. Vérifie tes informations.";
-		} else {
-			console.error("register failed");
-}
+		}
 	}
   });
