@@ -1,3 +1,20 @@
+async function logout() {
+	try {
+		const res = await fetch("/api/auth/logout", {
+			method: "POST"
+		});
+
+		if (!res.ok) {
+			throw new Error("Logout failed");
+		}
+
+		window.location.href = "/wall.html";
+	} catch (err) {
+		console.error(err);
+	}
+}
+
+window.logout = logout;
 async function checkAuth() {
     const res = await fetch('/api/auth/me', { credentials: 'include' })
     if (!res.ok) {

@@ -1,57 +1,43 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wall camagru</title>
-
-    <script>
-        fetch('/style/wall.css')
-            .then(res => res.text())
-            .then(css => {
-                const style = document.createElement('style');
-                style.textContent = css;
-                document.head.appendChild(style);
-            });
-    </script>
+   
+    <link rel="stylesheet" href="/style/wall.css">
 </head>
 <body>
-    <header>
-        <div class="container-header">
-            <h1>Camagru</h1>
-			<p class="avatar" id="username"></p>
-			<button id="editor">Editor</button>
-            <button id="login-btn" onclick="window.location.href='/login.html'">Login</button>
-            <button id="logout" onclick="logout()">Log out</button>
-        </div>
-    </header>
-      
-    <section class="wall">
-        <section class="layout">
-            <main class="feed">
-                </main>   
-            <aside class="sidebar">
-                <div>aside content</div>
-            </aside>          
-        </section>
-    </section>
-      
-    <footer>
-        <ul>
-            <li>Made by @csalamit</li>
-            <li>project from the outer core of 42</li>
-            <li>2026</li>
-        </ul>   
-    </footer>
 
-    <script>
-        fetch('/script/wall.js')
-            .then(res => res.text())
-            .then(js => {
-                const script = document.createElement('script');
-                script.textContent = js;
-                document.body.appendChild(script);
-            });
-    </script>
+<header>
+    <div class="container-header">
+        <h1>Camagru</h1>
+        <p id="username"></p>
+        <button onclick="window.location.href='/editor.html'">Editor</button>
+        <button id="login-btn" onclick="window.location.href='/login.html'">Login</button>
+        <button id="logout">Logout</button>
+    </div>
+</header>
+
+<section class="wall">
+    <section class="layout">
+       
+        <main class="feed"></main>
+        
+   
+  
+    </section>
+</section>
+
+<footer>
+    <ul>
+        <li>Made by @csalamit</li>
+        <li>project from the outer core of 42</li>
+        <li>2026</li>
+    </ul>
+</footer>
+
+<script src="/script/wall.js"></script>
+
 </body>
 </html>

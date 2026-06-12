@@ -5,20 +5,37 @@ const { sendCommentNotification } = require('../mailer');
 const router = express.Router()
 
 router.get('/', async (req, res) => {
-	try{
-		const page = req.query.page || 1
-		const limit = req.query.limit || 5
-		const offset = (page - 1) * limit
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 5;
+        const offset = (page - 1) * limit;
 
-		const [rows] = await db.execute(
-			'SELECT * FROM images ORDER BY created_at DESC LIMIT ? OFFSET ?',
-			[limit, offset]
-		)
-		res.json({image: rows, page});
-} catch(err) {
-	res.status(500).json({error: err.message})
-}
-})
+        const [rows] = await db.execute(
+            `
+            SELECT 
+                images.id,
+                images.filename,
+                images.created_at,
+                users.username,
+                COUNT(DISTINCT likes.id) AS likes,
+                COUNT(DISTINCT comments.id) AS comments
+            FROM images
+            JOIN users ON images.user_id = users.id
+            LEFT JOIN likes ON likes.image_id = images.id
+            LEFT JOIN comments ON comments.image_id = images.id
+            GROUP BY images.id, users.username, images.filename, images.created_at
+            ORDER BY images.created_at DESC
+            LIMIT ? OFFSET ?
+            `,
+            [limit, offset]
+        );
+
+        res.json(rows);
+
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 
 router.post('/:id/like',isAuth, async (req, res) => {
 	const image = req.params.id
