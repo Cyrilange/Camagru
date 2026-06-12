@@ -1,0 +1,156 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    list-style: none;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #fafafa;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+/* HEADER */
+
+.container-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid #ddd;
+    background: white;
+}
+
+.container-header h1 {
+    font-size: 1.5rem;
+}
+
+button {
+    cursor: pointer;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    background: white;
+    transition: transform 0.2s ease;
+}
+
+button:hover {
+    transform: scale(1.05);
+}
+
+/* MAIN LAYOUT */
+
+section {
+    flex: 1;
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+}
+
+/* ZONE WEBCAM */
+
+.preview-camera {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    background: white;
+    padding: 1rem;
+    border-radius: 12px;
+    border: 1px solid #ddd;
+}
+
+#video-webcam {
+    width: 70%;
+    max-height: 70vh;
+	margin: 0 auto;
+    border-radius: 10px;
+    background: black;
+    object-fit: cover;
+}
+
+#capture {
+	min-width: 15rem;
+	max-width: 22rem;
+	margin: 0 auto;
+	color: blue;
+}
+
+#capture:hover {
+	color: orange;
+}
+
+/* ASIDE */
+
+aside {
+    width: 320px;
+    min-width: 250px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    padding: 1rem;
+    align-self: flex-start;
+    position: sticky;
+    top: 1rem;
+}
+
+.liSetting {
+	margin: 0.6rem auto;
+}
+.liSetting > li {
+	cursor: pointer;
+	margin: 0.6rem auto;
+	text-transform: capitalize;
+}
+
+/* FOOTER */
+
+footer {
+    border-top: 1px solid #ddd;
+    padding: 1rem;
+    background: white;
+}
+
+footer ul {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* MOBILE */
+
+@media (max-width: 768px) {
+    section {
+        flex-direction: column;
+    }
+
+    aside {
+        width: 100%;
+        min-width: unset;
+        position: static;
+    }
+
+    #video-webcam {
+        max-height: 50vh;
+    }
+
+    .container-header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+
+
+
+    footer ul {
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+    }
+}

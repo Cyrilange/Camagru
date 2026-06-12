@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="style/editor.css">
+	<title>Editor</title>
+</head>
+<body>
+
+	<header class="container-header">
+		<h1>Camagru</h1>
+		<button id="wall">Wall</button>
+		<button id="logout" onclick="logout()">Log out</button>
+	</header>
+	<section>
+		<main class="left preview-camera">
+			<h2>Webcam</h2>
+			<video id="video-webcam" autoplay></video>
+			<button id="capture">Capture</button>
+		</main>
+		<aside class="rigth">
+			<div id="overlays-list"></div>
+			<h3>settings</h3>
+			<ul>
+				<ul>
+					<li>
+						<button
+							aria-expanded="false"
+							aria-controls="filters-panel">
+							Filters
+						</button>				
+						<div
+							id="filters-panel"
+							hidden>
+							<ul class="liSetting">
+								<li>grey</li>
+								<li>old</li>
+								<li>new</li>
+							</ul>
+						</div>
+					</li>
+				
+					<li>
+						<button
+							aria-expanded="false"
+							aria-controls="panel-2"
+						>
+						
+						<label for="size">Pixel</label>
+					</button>
+						<div id="panel-2" hidden>
+							<input
+							type="range"
+							id="size"
+							min="300"
+							max="1200"
+							value="300"
+							step="10">
+						<span id="size-value">300</span> px
+						</div>
+					</li>
+				</ul>
+			</ul>
+			<input type="file" id="upload-image" accept="image/*">
+			<section id="previous-photos"></section>
+		</aside>
+	</section>
+
+	<footer>
+		<ul>
+            <li>Made by @csalamit</li>
+            <li>project from the outer core of 42</li>
+            <li>2026</li>
+        </ul>   
+	</footer>
+
+	<script src="script/editer.js"></script>
+	
+</body>
+</html>
