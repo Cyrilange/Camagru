@@ -88,7 +88,7 @@ router.post('/logout', isAuth, (req, res) => {
   res.json({ success: true, message: 'Logged out' })
 })
 
-router.get('/me',isAuth, async (req, res) => {
+router.get('/me', async (req, res) => {
   const [rows] = await db.execute('SELECT id, username, email FROM users WHERE id = ?', [req.session.user.id])
   const user = rows[0]
   if (!user)
@@ -96,6 +96,7 @@ router.get('/me',isAuth, async (req, res) => {
   
   res.json(user)
 })
+
 
 
 router.get('/verify', async (req, res) => {

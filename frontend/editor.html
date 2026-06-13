@@ -1,81 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link rel="stylesheet" href="style/login.css">
-	<title>Editor</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/style/settings.css">
+    <link rel="stylesheet" href="/style/editor.css">
+    <title>Editor</title>
 </head>
 <body>
 
-	<header class="container-header">
-		<h1>Camagru</h1>
-		<button id="wall">Wall</button>
-		<button id="logout" onclick="logout()">Log out</button>
-	</header>
-	<section>
-		<main class="left preview-camera">
-			<h2>Webcam</h2>
-			<video id="video-webcam" autoplay></video>
-			<button id="capture">Capture</button>
-		</main>
-		<aside class="rigth">
-			<div id="overlays-list"></div>
-			<h3>settings</h3>
-			<ul>
-				<ul>
-					<li>
-						<button
-							aria-expanded="false"
-							aria-controls="filters-panel">
-							Filters
-						</button>				
-						<div
-							id="filters-panel"
-							hidden>
-							<ul class="liSetting">
-								<li>grey</li>
-								<li>old</li>
-								<li>new</li>
-							</ul>
-						</div>
-					</li>
-				
-					<li>
-						<button
-							aria-expanded="false"
-							aria-controls="panel-2"
-						>
-						
-						<label for="size">Pixel</label>
-					</button>
-						<div id="panel-2" hidden>
-							<input
-							type="range"
-							id="size"
-							min="300"
-							max="1200"
-							value="300"
-							step="10">
-						<span id="size-value">300</span> px
-						</div>
-					</li>
-				</ul>
-			</ul>
-			<input type="file" id="upload-image" accept="image/*">
-			<section id="previous-photos"></section>
-		</aside>
-	</section>
+    <header class="container-header">
+        <h1>Camagru</h1>
+        <button id="wall" onclick="window.location.href='/wall.html'">Wall</button>
+        <button id="logout" onclick="logout()">Log out</button>
+    </header>
 
-	<footer>
-		<ul>
+    <section class="editor-layout">
+
+        <main class="left preview-camera">
+            <h2>Webcam</h2>
+            <div class="preview-wrapper">
+                <video id="video-webcam" autoplay></video>
+                <img id="preview-image" style="display:none;">
+                <img id="overlay-preview" style="display:none;">
+            </div>
+            <input type="file" id="upload-image" accept="image/*">
+		<input type="range" id="size" min="100" max="800" value="300" step="10">
+		<span id="size-value">300</span>
+		<div id="filters-list">
+    <button class="filter-btn" data-filter="none">Normal</button>
+    <button class="filter-btn" data-filter="grayscale(100%)">W&B</button>
+    <button class="filter-btn" data-filter="sepia(100%)">Sépia</button>
+    <button class="filter-btn" data-filter="contrast(150%) brightness(110%)">brightness</button>
+    <button class="filter-btn" data-filter="hue-rotate(90deg)">Green</button>
+    <button class="filter-btn" data-filter="invert(100%)">Invert</button>
+</div>
+		<button id="capture" disabled>Capture</button>
+        </main>
+
+        <aside class="right">
+            <div class="section-block">
+                <h2>Overlays</h2>
+                <div id="overlays-list"></div>
+            </div>
+
+            <div class="section-block">
+                <h2>My Gallery</h2>
+                <section id="previous-photos"></section>
+                <div id="pagination">
+                    <button id="prevPage">←</button>
+                    <span id="pageInfo"></span>
+                    <button id="nextPage">→</button>
+                </div>
+            </div>
+        </aside>
+
+    </section>
+
+    <footer>
+        <ul>
             <li>Made by @csalamit</li>
             <li>project from the outer core of 42</li>
             <li>2026</li>
-        </ul>   
-	</footer>
+        </ul>
+    </footer>
 
-	<script src="script/editer.js"></script>
-	
+    <script src="script/editer.js"></script>
+
 </body>
 </html>

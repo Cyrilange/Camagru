@@ -1,124 +1,200 @@
 async function logout() {
-	try {
-		const res = await fetch("/api/auth/logout", {
-			method: "POST"
-		});
+    try {
+        const res = await fetch("/api/auth/logout", { method: "POST" });
+        if (!res.ok) throw new Error("Logout failed");
+        window.location.href = "/wall.html";
+    } catch (err) {
+        console.error(err);
+    }
+}
+window.logout = logout;
 
-		if (!res.ok) {
-			throw new Error("Logout failed");
-		}
+async function checkAuth() {
+    const res = await fetch('/api/auth/me', { credentials: 'include' });
+    if (!res.ok) window.location.href = '/login.html';
+}
+checkAuth();
 
-		window.location.href = "/wall.html";
-	} catch (err) {
-		console.error(err);
-	}
+let photos = [];
+let currentPage = 1;
+const perPage = 5;
+
+function renderPhotos() {
+    const container = document.getElementById('previous-photos');
+    if (!photos || photos.length === 0) {
+        container.innerHTML = '<p>No photo yet</p>';
+        return;
+    }
+    container.innerHTML = photos.map(p =>
+        ` <div style="position:relative; display:inline-block;">
+            <img src="${p.filename}" style="width:50px; margin:5px;">
+            <button onclick="deletePhoto(${p.id})" style="position:absolute; top:0; right:0; padding:2px 5px; font-size:10px; background:red; color:white; border:none; border-radius:4px; cursor:pointer;">✕</button>
+        </div>`
+    ).join('');
 }
 
-window.logout = logout;
-async function checkAuth() {
-    const res = await fetch('/api/auth/me', { credentials: 'include' })
-    if (!res.ok) {
-        window.location.href = '/login.html'
+
+async function deletePhoto(id) {
+    if (!confirm('Delete this photo?')) return;
+
+    const res = await fetch(`/api/editor/${id}`, {
+        method: 'DELETE',
+        credentials: 'include'
+    });
+
+    if (res.ok) {
+        loadPhotos(currentPage);
+    } else {
+        const err = await res.json();
+        alert('Error: ' + err.error);
+    }
+}
+window.deletePhoto = deletePhoto;
+
+
+async function loadPhotos(page = 1) {
+    try {
+        const res = await fetch(`/api/gallery/me?page=${page}&limit=${perPage}`, {
+            credentials: 'include'
+        });
+        const data = await res.json();
+        photos = data.images || [];
+        const total = data.total || 0;
+        renderPhotos();
+        document.getElementById('nextPage').disabled = (page * perPage >= total);
+        document.getElementById('prevPage').disabled = (page === 1);
+        document.getElementById('pageInfo').textContent = total > 0
+            ? `Page ${page} / ${Math.ceil(total / perPage)}`
+            : '0 photo';
+    } catch (err) {
+        console.error('loadPhotos error:', err);
     }
 }
 
-checkAuth()
+document.getElementById('nextPage').addEventListener('click', () => {
+    currentPage++;
+    loadPhotos(currentPage);
+});
 
-const video = document.getElementById('video-webcam');
-const sizeInput = document.getElementById('size');
-const sizeValue = document.getElementById('size-value');
-
-async function loadOverlays() {
-    const res = await fetch('/api/editor/overlays')
-    const data = await res.json()
-    
-    const list = document.getElementById('overlays-list')
-    list.innerHTML = data.overlays.map(overlay => `
-        <img src="/uploads/overlays/${overlay}" 
-             class="overlay-thumb" 
-             data-name="${overlay}"
-             onclick="selectOverlay(this)">
-    `).join('')
-}
-
-
+document.getElementById('prevPage').addEventListener('click', () => {
+    if (currentPage > 1) {
+        currentPage--;
+        loadPhotos(currentPage);
+    }
+});
 
 let selectedOverlay = null;
+let selectedFilter = 'none';
 const captureBtn = document.getElementById('capture');
-captureBtn.disabled = true;
+const video = document.getElementById('video-webcam');
+const previewImg = document.getElementById('preview-image');
+let currentStream = null;
+let uploadedFile = null;
+
+async function loadOverlays() {
+    const res = await fetch('/api/editor/overlays');
+    const data = await res.json();
+    const list = document.getElementById('overlays-list');
+    list.innerHTML = data.overlays.map(overlay => `
+        <img src="/uploads/overlays/${overlay}"
+             class="overlay-thumb"
+             data-name="${overlay}">
+    `).join('');
+    list.querySelectorAll('.overlay-thumb').forEach(img => {
+        img.addEventListener('click', () => selectOverlay(img));
+    });
+}
 
 function selectOverlay(img) {
     document.querySelectorAll('.overlay-thumb').forEach(i => i.classList.remove('selected'));
     img.classList.add('selected');
     selectedOverlay = img.dataset.name;
     captureBtn.disabled = false;
+    const overlayPreview = document.getElementById('overlay-preview');
+    overlayPreview.src = `/uploads/overlays/${selectedOverlay}`;
+    overlayPreview.style.display = 'block';
 }
 
-captureBtn.addEventListener('click', async () => {
-    const canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    canvas.getContext('2d').drawImage(video, 0, 0);
-
-    canvas.toBlob(async (blob) => {
-        const form = new FormData();
-        form.append('image', blob, 'capture.jpg');
-        form.append('overlay', selectedOverlay);
-
-        const res = await fetch('/api/editor/capture', {
-            method: 'POST',
-            credentials: 'include',
-            body: form
+async function startCamera() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+            video: { width: 300, height: 300 }
         });
+        currentStream = stream;
+        video.srcObject = stream;
+        video.style.display = 'block';
+        previewImg.style.display = 'none';
+    } catch (err) {
+        console.warn('Webcam undisponible');
+        video.style.display = 'none';
+    }
+}
 
-        if (res.ok) {
-            alert('Photo saved!');
-        }
-    }, 'image/jpeg');
+document.getElementById('upload-image').addEventListener('change', (e) => {
+    uploadedFile = e.target.files[0];
+    if (uploadedFile) {
+        const url = URL.createObjectURL(uploadedFile);
+        previewImg.src = url;
+        previewImg.style.display = 'block';
+        video.style.display = 'none';
+    }
+});
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedFilter = btn.dataset.filter;
+        video.style.filter = selectedFilter;
+        previewImg.style.filter = selectedFilter;
+    });
+});
+
+captureBtn.addEventListener('click', async () => {
+    if (!selectedOverlay) {
+        alert('Choose an overlay !');
+        return;
+    }
+
+    const size = 300;
+    const source = uploadedFile ? previewImg : video;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    ctx.filter = selectedFilter;
+    ctx.drawImage(source, 0, 0, size, size);
+
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg'));
+
+    const form = new FormData();
+    form.append('image', blob, 'capture.jpg');
+    form.append('overlay', selectedOverlay);
+
+    const res = await fetch('/api/editor/capture', {
+        method: 'POST',
+        credentials: 'include',
+        body: form
+    });
+
+    if (res.ok) {
+        alert('Photo saved!');
+        uploadedFile = null;
+        document.getElementById('upload-image').value = '';
+        previewImg.style.display = 'none';
+        previewImg.style.filter = 'none';
+        video.style.filter = 'none';
+        selectedFilter = 'none';
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('selected'));
+        startCamera();
+        loadPhotos(1);
+    } else {
+        const err = await res.json();
+        alert('Error: ' + err.error);
+    }
 });
 
 loadOverlays();
-
-let currentStream;
-
-async function startCamera(size) {
-    if (currentStream) {
-        currentStream.getTracks().forEach(track => track.stop());
-    }
-
-    const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-            width: size,
-            height: size,
-            facingMode: "environment"
-        }
-    });
-
-    currentStream = stream;
-    video.srcObject = stream;
-}
-
-sizeInput.addEventListener('input', () => {
-    sizeValue.textContent = sizeInput.value;
-});
-
-sizeInput.addEventListener('change', () => {
-    startCamera(Number(sizeInput.value));
-});
-
-startCamera(300);
-
-
-	document.querySelectorAll('button[aria-controls]').forEach(button => {
-		button.addEventListener('click', () => {
-			const panel = document.getElementById(
-				button.getAttribute('aria-controls')
-			);
-	
-			const expanded =
-				button.getAttribute('aria-expanded') === 'true';
-	
-			button.setAttribute('aria-expanded', !expanded);
-			panel.hidden = expanded;
-		});
-	});
+startCamera();
+loadPhotos(1);

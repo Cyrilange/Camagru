@@ -8,7 +8,6 @@ CREATE TABLE users (
     reset_token VARCHAR(64) DEFAULT NULL,
     notify_comments TINYINT(1) NOT NULL DEFAULT 1
 );
-
 CREATE TABLE images (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
@@ -16,7 +15,6 @@ CREATE TABLE images (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
-
 CREATE TABLE likes (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
@@ -25,7 +23,6 @@ CREATE TABLE likes (
     FOREIGN KEY (image_id) REFERENCES images(id),
     UNIQUE KEY unique_like (user_id, image_id)
 );
-
 CREATE TABLE comments (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
@@ -36,34 +33,38 @@ CREATE TABLE comments (
     FOREIGN KEY (image_id) REFERENCES images(id)
 );
 
-INSERT INTO users (username, email, password_hash)
-VALUES
-('alice', 'alice@test.com', 'hash'),
-('bob', 'bob@test.com', 'hash'),
-('charlie', 'charlie@test.com', 'hash');
+INSERT INTO users (username, email, password_hash, is_verified) VALUES
+('alice',   'alice@test.com',   'hash', 1),
+('bob',     'bob@test.com',     'hash', 1),
+('charlie', 'charlie@test.com', 'hash', 1);
 
-INSERT INTO images (user_id, filename)
-VALUES
-(1, '/uploads/overlays/overlay_1.jpg'),
-(1, '/uploads/overlays/overlay_2.jpg'),
-(2, '/uploads/overlays/overlay_3.jpg'),
-(2, '/uploads/overlays/overlay_4.jpg'),
-(3, '/uploads/overlays/overlay_5.jpg');
+INSERT INTO images (user_id, filename) VALUES
+(1, '/uploads/test1.jpg'),
+(1, '/uploads/test2.jpg'),
+(2, '/uploads/test3.jpg'),
+(2, '/uploads/test4.jpg'),
+(3, '/uploads/test5.jpg'),
+(1, '/uploads/test6.jpg'),
+(2, '/uploads/test7.jpg'),
+(3, '/uploads/test8.jpg'),
+(1, '/uploads/test9.jpg'),
+(2, '/uploads/test10.jpg'),
+(3, '/uploads/test11.jpg'),
+(1, '/uploads/test12.jpg'),
+(2, '/uploads/test13.jpg'),
+(3, '/uploads/test14.jpg'),
+(1, '/uploads/test15.jpg'),
+(2, '/uploads/test16.jpg'),
+(3, '/uploads/test17.jpg'),
+(1, '/uploads/test18.jpg'),
+(2, '/uploads/test19.jpg'),
+(3, '/uploads/test20.jpg');
 
-INSERT INTO likes (user_id, image_id)
-VALUES
-(2, 1),
-(3, 1),
-(1, 2),
-(3, 2),
-(1, 3),
-(2, 3),
-(1, 4),
-(2, 5),
-(3, 5);
+INSERT INTO likes (user_id, image_id) VALUES
+(2, 1), (3, 1), (1, 2), (3, 2),
+(1, 3), (2, 3), (1, 4), (2, 5), (3, 5);
 
-INSERT INTO comments (user_id, image_id, content)
-VALUES
+INSERT INTO comments (user_id, image_id, content) VALUES
 (2, 1, 'This looks amazing!'),
 (3, 1, 'Love the style 🔥'),
 (1, 2, 'Nice shot!'),

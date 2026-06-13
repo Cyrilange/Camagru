@@ -54,47 +54,43 @@ router.get('/images', async (req, res) => {
 
 
 router.post('/capture', isAuth, upload.single('image'), async (req, res) => {
-	if (!req.file)
-		return res.status(404).json({ error: 'file does not exist' })
+    if (!req.file)
+        return res.status(404).json({ error: 'file does not exist' })
 
-	const overlay = req.body.overlay
-	const userId = req.session.user.id
+    const overlay = req.body.overlay
+    const userId = req.session.user.id
 
-	try {
-		const overlays = fs.readdirSync('./uploads/overlays')
+    try {
+        const overlays = fs.readdirSync('./uploads/overlays')
+        if (!overlays.includes(overlay))
+            return res.status(400).json({ error: 'Invalid overlay' })
 
-		if (!overlays.includes(overlay))
-			return res.status(400).json({ error: 'Invalid overlay' })
+        const outputPath = `./uploads/${Date.now()}_result.png`
 
-		const outputPath = `./uploads/${Date.now()}_result.jpg`
+        const baseImage = sharp(req.file.path)
+        const metadata = await baseImage.metadata()
 
-		await sharp(req.file.path)
-			.composite([
-				{
-					input: `./uploads/overlays/${overlay}`,
-					gravity: 'center'
-				}
-			])
-			.toFile(outputPath)
+        const overlayResized = await sharp(`./uploads/overlays/${overlay}`)
+            .resize(metadata.width, metadata.height, { fit: 'fill' })
+            .toBuffer()
 
-		fs.unlinkSync(req.file.path)
+        await baseImage
+            .composite([{ input: overlayResized, gravity: 'center' }])
+            .toFile(outputPath)
 
-		await db.execute(
-			'INSERT INTO images (user_id, filename) VALUES (?, ?)',
-			[userId, outputPath]
-		)
+        fs.unlinkSync(req.file.path)
 
-		res.json({
-			success: true,
-			filename: outputPath
-		})
+        await db.execute(
+            'INSERT INTO images (user_id, filename) VALUES (?, ?)',
+            [userId, outputPath]
+        )
 
-	} catch (err) {
-		res.status(400).json({ error: err.message })
-	}
+        res.json({ success: true, filename: outputPath })
+
+    } catch (err) {
+        res.status(400).json({ error: err.message })
+    }
 })
-
-
 
 
 router.delete('/:id', isAuth, async (req, res) => {

@@ -10,28 +10,71 @@ router.get('/', async (req, res) => {
         const limit = parseInt(req.query.limit) || 5;
         const offset = (page - 1) * limit;
 
-        const [rows] = await db.execute(
-            `
+        const [[{ total }]] = await db.execute('SELECT COUNT(*) as total FROM images');
+
+        const [rows] = await db.execute(`
             SELECT 
                 images.id,
                 images.filename,
                 images.created_at,
                 users.username,
-                COUNT(DISTINCT likes.id) AS likes,
-                COUNT(DISTINCT comments.id) AS comments
+                (SELECT COUNT(*) FROM likes WHERE likes.image_id = images.id) AS likes,
+                (SELECT COUNT(*) FROM comments WHERE comments.image_id = images.id) AS comments
             FROM images
-            JOIN users ON images.user_id = users.id
-            LEFT JOIN likes ON likes.image_id = images.id
-            LEFT JOIN comments ON comments.image_id = images.id
-            GROUP BY images.id, users.username, images.filename, images.created_at
+            JOIN users ON users.id = images.user_id
             ORDER BY images.created_at DESC
             LIMIT ? OFFSET ?
-            `,
-            [limit, offset]
+        `, [limit, offset]);
+
+        res.json({ images: rows, total });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+router.get('/:id/comments', async (req, res) => {
+    try {
+        const [rows] = await db.execute(`
+            SELECT comments.content, comments.created_at, users.username
+            FROM comments
+            JOIN users ON users.id = comments.user_id
+            WHERE comments.image_id = ?
+            ORDER BY comments.created_at ASC
+        `, [req.params.id]);
+        res.json(rows);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+router.get('/me', isAuth, async (req, res) => {
+    try {
+        const userId = req.session.user.id;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 5;
+        const offset = (page - 1) * limit;
+
+        const [[{ total }]] = await db.execute(
+            'SELECT COUNT(*) as total FROM images WHERE user_id = ?',
+            [userId]
         );
 
-        res.json(rows);
+        const [rows] = await db.execute(`
+            SELECT 
+                images.id,
+                images.filename,
+                images.created_at,
+                users.username,
+                (SELECT COUNT(*) FROM likes WHERE likes.image_id = images.id) AS likes,
+                (SELECT COUNT(*) FROM comments WHERE comments.image_id = images.id) AS comments
+            FROM images
+            JOIN users ON users.id = images.user_id
+            WHERE images.user_id = ?
+            ORDER BY images.created_at DESC
+            LIMIT ? OFFSET ?
+        `, [userId, limit, offset]);
 
+        res.json({ images: rows, total });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

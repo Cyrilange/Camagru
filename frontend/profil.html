@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/style/settings.css">
+    <title>Settings</title>
+</head>
+<body>
+    <header class="container-header">
+        <h1>Camagru</h1>
+        <button onclick="window.location.href='/wall.html'">Wall</button>
+        <button onclick="logout()">Log out</button>
+    </header>
+
+    <main class="settings-layout">
+        <h2>Profil</h2>
+
+        <div class="settings-block">
+            <label>Username</label>
+            <input type="text" id="username" placeholder="Nouveau username">
+        </div>
+
+        <div class="settings-block">
+            <label>Email</label>
+            <input type="email" id="email" placeholder="Nouvel email">
+        </div>
+
+        <div class="settings-block">
+            <label>Password</label>
+            <input type="password" id="password" placeholder="Nouveau mot de passe">
+        </div>
+
+        <div class="settings-block">
+            <label>
+                <input type="checkbox" id="notify_comments">
+                Receive a notif for comments ?
+            </label>
+        </div>
+
+        <button id="save-btn">Save</button>
+        <p id="msg"></p>
+    </main>
+
+    <script src="script/profil.js"></script>
+</body>
+</html>

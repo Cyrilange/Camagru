@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wall camagru</title>
-   
+   <link rel="stylesheet" href="/style/settings.css">
     <link rel="stylesheet" href="/style/wall.css">
 </head>
 <body>
@@ -13,9 +13,12 @@
     <div class="container-header">
         <h1>Camagru</h1>
         <p id="username"></p>
+        <div>
+        <button onclick="window.location.href='/profil.html'">Profil</button>
         <button onclick="window.location.href='/editor.html'">Editor</button>
         <button id="login-btn" onclick="window.location.href='/login.html'">Login</button>
         <button id="logout">Logout</button>
+        </div>
     </div>
 </header>
 
@@ -23,10 +26,16 @@
     <section class="layout">
        
         <main class="feed"></main>
-        
+
    
   
     </section>
+    <div class="pagination">
+            <button id="prevPage">←</button>
+<span id="pageInfo"></span>
+<button id="nextPage">→</button>
+</div>
+        
 </section>
 
 <footer>
