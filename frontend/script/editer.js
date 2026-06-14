@@ -21,6 +21,7 @@ const perPage = 5;
 
 function renderPhotos() {
     const container = document.getElementById('previous-photos');
+    container.innerHTML = '';
     if (!photos || photos.length === 0) {
         container.innerHTML = '<p>No photo yet</p>';
         return;
