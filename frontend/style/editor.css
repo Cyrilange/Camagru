@@ -1,16 +1,5 @@
 /* HEADER */
 
-.container-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem;
-    border-bottom: 1px solid #ddd;
-}
-
-.container-header h1 {
-    font-size: 1.5rem;
-}
 
 /* MAIN LAYOUT */
 
@@ -30,7 +19,7 @@ section {
     gap: 1rem;
     padding: 1rem;
     border-radius: 12px;
-    border: 1px solid #ddd;
+    border: 1px solid #dddddd59;
 }
 
 /* PREVIEW */
@@ -83,7 +72,7 @@ section {
 }
 
 #overlays-list img.selected {
-    border: 2px solid #fff;
+    border: 2px solid #ffffff91;
 }
 
 /* CAPTURE */
@@ -113,6 +102,9 @@ section {
     position: sticky;
     top: 1rem;
 }
+   .over {
+        margin-bottom: 0.6rem;
+    }
 
 .section-block {
     margin-bottom: 1rem;
@@ -169,6 +161,12 @@ section {
         min-width: unset;
         position: static;
     }
+
+    .right {
+        width: 100%;
+    }
+
+ 
 
     .container-header {
         flex-direction: row;

@@ -14,6 +14,10 @@ router.post('/register', validatePassword, async (req, res) => {
   if (!username || !email || !password)
     return res.status(400).json({ error: 'login, email and password are required' })
 
+  const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/
+  if (!usernameRegex.test(username))
+    return res.status(400).json({ error: 'Username must be 3-20 chars, letters, numbers and _ only' })
+
   try {
     const token = crypto.randomBytes(32).toString('hex')
     const salt = await bcrypt.genSalt(12)
@@ -64,8 +68,8 @@ router.post('/login', async (req, res) => {
   }
 })
 
-router.post('/forgot-password',  async (req, res) => {
-  const {email} = req.body;
+router.post('/forgot-password', async (req, res) => {
+  const { email } = req.body;
   if (!email)
     return res.status(400).json({ error: 'email is required' })
   try {
@@ -73,14 +77,14 @@ router.post('/forgot-password',  async (req, res) => {
     const [rows] = await db.execute('SELECT * FROM users WHERE email = ?', [email])
     const user = rows[0]
     if (!user)
-        return res.status(404).json({ error: 'Email not found' })
-    await db.execute('UPDATE users SET reset_token = ? WHERE id = ?', [token, user.id])
+      return res.json({ success: true, message: 'If this email exists, a reset link was sent' })
+    await db.execute(
+    'UPDATE users SET reset_token = ?, reset_token_expires = DATE_ADD(NOW(), INTERVAL 1 HOUR) WHERE id = ?',[token, user.id])
     await sendResetPassword(email, token);
-    res.json({ success: true, message: 'Reset email sent' })
-} catch(err) {
-  res.status(500).json({error: err.message})
-}
-
+    res.json({ success: true, message: 'If this email exists, a reset link was sent' })
+  } catch(err) {
+    res.status(500).json({ error: err.message })
+  }
 })
 
 router.post('/logout', isAuth, (req, res) => {
@@ -89,14 +93,19 @@ router.post('/logout', isAuth, (req, res) => {
 })
 
 router.get('/me', async (req, res) => {
-  const [rows] = await db.execute('SELECT id, username, email FROM users WHERE id = ?', [req.session.user.id])
-  const user = rows[0]
-  if (!user)
-    return res.json({ user: null })
-  
-  res.json(user)
-})
+  if (!req.session.user)
+    return res.status(401).json({ error: 'Not authenticated' })
 
+  try {
+    const [rows] = await db.execute('SELECT id, username, email FROM users WHERE id = ?', [req.session.user.id])
+    const user = rows[0]
+    if (!user)
+      return res.status(404).json({ error: 'User not found' })
+    res.json(user)
+  } catch(err) {
+    res.status(500).json({ error: err.message })
+  }
+})
 
 
 router.get('/verify', async (req, res) => {
@@ -118,9 +127,8 @@ router.get('/verify', async (req, res) => {
 router.post('/reset-password', validatePassword, async (req, res) => {
   const { token, password } = req.body;
 
-  if (!token || !password) {
+  if (!token || !password)
     return res.status(400).json({ error: 'missing token or password' });
-  }
 
   try {
     const [rows] = await db.execute(
@@ -130,15 +138,17 @@ router.post('/reset-password', validatePassword, async (req, res) => {
 
     const user = rows[0];
 
-    if (!user) {
-      return res.status(400).json({ error: 'invalid token' });
-    }
+    if (!user)
+      return res.status(400).json({ error: 'invalid token' })
+
+    if (new Date(user.reset_token_expires) < new Date())
+      return res.status(400).json({ error: 'Token expired, please request a new one' })
 
     const salt = await bcrypt.genSalt(12);
     const password_hash = await bcrypt.hash(password, salt);
 
     await db.execute(
-      'UPDATE users SET password_hash = ?, reset_token = NULL WHERE id = ?',
+      'UPDATE users SET password_hash = ?, reset_token = NULL, reset_token_expires = NULL WHERE id = ?',
       [password_hash, user.id]
     );
 

@@ -30,6 +30,8 @@ button:hover {
 }
 
 
+
+
 /* FOOTER */
 footer {
     border-top: 1px solid #333;
@@ -47,15 +49,25 @@ footer ul {
 }
 
 
+.container-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid #333;
+    background: #1a1a1d;
+}
 
 /* setting page for the profil */
 
 .settings-layout {
     max-width: 400px;
-    margin: 2rem auto;
-    padding: 1rem;
+    margin: 12rem auto;
+    padding: 2rem;
     display: flex;
     flex-direction: column;
+      border: 1px solid #333333a2;
+      border-radius: 10px;
     gap: 1rem;
 }
 
@@ -73,4 +85,30 @@ footer ul {
     border: 1px solid #333;
     background: #1a1a1d;
     color: #eaeaea;
+}
+
+
+@media (max-width: 600px) {
+
+      h1 {
+      font-size: 1.2rem;
+    
+    }
+button {
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    text-align: center;
+    font-size: 0.55rem;
+    padding: 0.7rem;
+    
+}
+
+.container-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 1rem;
+   
+}
 }

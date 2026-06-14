@@ -18,38 +18,52 @@ function showAuthMsg(imageId) {
     setTimeout(() => msg.style.display = 'none', 3000);
 }
 
+function shareUrl(filename) {
+    return encodeURIComponent(window.location.origin + '/' + filename)
+}
+
 async function loadPosts(page = 1) {
     const res = await fetch(`/api/gallery?page=${page}&limit=${perPage}`);
     const data = await res.json();
 
-    const feed = document.querySelector(".feed");
-    feed.innerHTML = data.images.map(post => `
-        <article class="post">
-            <div class="post-header">
-                <div class="avatar">
-                    ${escapeHtml(post.username?.[0]?.toUpperCase() || "?")}
-                </div>
-                <div class="username">${escapeHtml(post.username)}</div>
-            </div>
+const feed = document.querySelector(".feed");
+feed.innerHTML = "";
 
-            <img src="${post.filename}" />
-
-            <div class="actions container-date_likes">
-                <p class="likes" onclick="toggleLike(${post.id}, this)">🩷 ${post.likes}</p>
-                <p class="com" onclick="toggleComments(${post.id}, this)">💬 ${post.comments}</p>
-                <p class="date">${new Date(post.created_at).toLocaleDateString('en-GB')}</p>
+feed.insertAdjacentHTML(
+  "beforeend",
+  data.images.map(post => `
+    <article class="post">
+        <div class="post-header">
+            <div class="avatar">
+                ${escapeHtml(post.username?.[0]?.toUpperCase() || "?")}
             </div>
+            <div class="username">${escapeHtml(post.username)}</div>
+        </div>
 
-            <div id="comments-${post.id}" class="comments-section" style="display:none;">
-                <div id="comments-list-${post.id}"></div>
-                <div class="comment-form">
-                    <input type="text" id="comment-input-${post.id}" placeholder="Add a comment...">
-                    <button onclick="submitComment(${post.id})">Send</button>
-                    <p id="auth-msg-${post.id}" style="display:none; color:red;"></p>
-                </div>
+        <img src="${post.filename}" />
+
+       <div class="actions container-date_likes">
+    <p class="likes" onclick="toggleLike(${post.id}, this)">🩷 ${post.likes}</p>
+    <p class="com" onclick="toggleComments(${post.id}, this)">💬 ${post.comments}</p>
+    <p class="date">${new Date(post.created_at).toLocaleDateString('en-GB')}</p>
+  
+    <div class="share-btns">                                                                                                                                                
+    <button onclick="window.open('https://twitter.com/intent/tweet?url=' + shareUrl('${post.filename}'), '_blank')"><i class="fa-brands fa-x-twitter"></i></button>
+    <button onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=' + shareUrl('${post.filename}'), '_blank')"><i class="fa-brands fa-facebook"></i></button>
+    <button onclick="window.open('https://wa.me/?text=' + shareUrl('${post.filename}'), '_blank')"><i class="fa-brands fa-whatsapp"></i></button>
+    </div>
+    </div>
+        <div id="comments-${post.id}" class="comments-section" style="display:none;">
+            <div id="comments-list-${post.id}"></div>
+            <div class="comment-form">
+                <input type="text" id="comment-input-${post.id}" placeholder="Add a comment...">
+                <button onclick="submitComment(${post.id})">Send</button>
+                <p id="auth-msg-${post.id}" style="display:none; color:red;"></p>
             </div>
-        </article>
-    `).join("");
+        </div>
+    </article>
+  `).join("")
+);
 
     document.getElementById('pageInfo').textContent = `Page ${page} / ${Math.ceil(data.total / perPage)}`;
     document.getElementById('prevPage').disabled = (page === 1);

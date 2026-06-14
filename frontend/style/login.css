@@ -56,6 +56,14 @@
   input:focus {
 	border-color: #5a5a5a;
   }
+
+  #go-register {
+	margin-bottom: 0.5rem;
+  }
+
+  #login-error {
+	text-align: center;
+  }
   
   button {
 	padding: 12px;

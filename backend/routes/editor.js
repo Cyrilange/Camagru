@@ -8,11 +8,20 @@ const { isAuth } = require('../middlewares/auth')
 const router = express.Router()
 
 const storage = multer.diskStorage({
-	destination: (req, file, cb) => cb(null, './uploads/'),
-	filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname))
-  })
-const upload = multer({ storage })
+    destination: (req, file, cb) => cb(null, './uploads/'),
+    filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname))
+})
 
+const upload = multer({
+    storage,
+    limits: { fileSize: 5 * 1024 * 1024 },
+    fileFilter: (req, file, cb) => {
+        const allowed = ['image/jpeg', 'image/png', 'image/webp']
+        if (!allowed.includes(file.mimetype))
+            return cb(new Error('Only images allowed'))
+        cb(null, true)
+    }
+})
 
 router.get('/overlays', async (req, res) => {
     try {
@@ -53,7 +62,15 @@ router.get('/images', async (req, res) => {
 
 
 
-router.post('/capture', isAuth, upload.single('image'), async (req, res) => {
+router.post('/capture', isAuth, (req, res, next) => {
+    upload.single('image')(req, res, (err) => {
+        if (err instanceof multer.MulterError)
+            return res.status(400).json({ error: 'File too large, max 5MB' })
+        else if (err)
+            return res.status(400).json({ error: err.message })
+        next()
+    })
+}, async (req, res) => {
     if (!req.file)
         return res.status(404).json({ error: 'file does not exist' })
 
