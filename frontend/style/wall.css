@@ -186,9 +186,7 @@
         grid-template-columns: repeat(2, 1fr);
     }
 
-    .feed .post:first-child {
-        grid-column: span 2;
-    }
+
 }
 
 @media (max-width: 600px) {
@@ -198,8 +196,16 @@
       
     }
 
+     .feed .post:nth-child(1) {
+        align-self: unset;
+        display: block;
+    }
 
-
+    .feed .post:nth-child(1) img {
+        flex: unset;
+        height: auto;
+        aspect-ratio: 1 / 1;
+    }
     .feed {
         display: flex;
         justify-content: center;
