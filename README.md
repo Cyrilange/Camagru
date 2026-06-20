@@ -52,7 +52,7 @@ REST Client (VS Code) — `test.http` file at the root.
 | GET | `/api/auth/verify?token=xxx` | Verify email |
 
 ### Rules
-- Username: 3-50 chars, letters/numbers/- _
+- Username: 3-20 chars, letters/numbers/- _
 - Email: valid format
 - Password: 8+ chars, 1 uppercase, 1 number, 1 special character
 

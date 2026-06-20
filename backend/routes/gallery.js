@@ -1,16 +1,18 @@
-const express = require('express')
+const router = require('../router')
 const db = require('../database')
 const { isAuth, validatePassword } = require('../middlewares/auth')
 const { sendCommentNotification } = require('../mailer');
-const router = express.Router()
 
-router.get('/', async (req, res) => {
+
+router.get('/api/gallery', async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 5;
         const offset = (page - 1) * limit;
 
-        const [[{ total }]] = await db.execute('SELECT COUNT(*) as total FROM images');
+        const [countRows] = await db.execute('SELECT COUNT(*) as total FROM images');
+
+        const total = countRows?.[0]?.total || 0;
 
         const [rows] = await db.execute(`
             SELECT 
@@ -28,11 +30,11 @@ router.get('/', async (req, res) => {
 
         res.json({ images: rows, total });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.json({ error: err.message }, 500);
     }
 });
 
-router.get('/:id/comments', async (req, res) => {
+router.get('/api/gallery/:id/comments', async (req, res) => {
     try {
         const [rows] = await db.execute(`
             SELECT comments.content, comments.created_at, users.username
@@ -43,21 +45,28 @@ router.get('/:id/comments', async (req, res) => {
         `, [req.params.id]);
         res.json(rows);
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.json({ error: err.message }, 500);
     }
 });
 
-router.get('/me', isAuth, async (req, res) => {
+router.get('/api/gallery/me', isAuth, async (req, res) => {
     try {
-        const userId = req.session.user.id;
+        const userId = req.session?.user?.id;
+
+        if (!userId) {
+            return res.json({ error: "unauthorized" }, 401);
+        }
+
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 5;
         const offset = (page - 1) * limit;
 
-        const [[{ total }]] = await db.execute(
+        const [countRows] = await db.execute(
             'SELECT COUNT(*) as total FROM images WHERE user_id = ?',
             [userId]
         );
+
+        const total = countRows?.[0]?.total || 0;
 
         const [rows] = await db.execute(`
             SELECT 
@@ -74,17 +83,18 @@ router.get('/me', isAuth, async (req, res) => {
             LIMIT ? OFFSET ?
         `, [userId, limit, offset]);
 
-        res.json({ images: rows, total });
+        return res.json({ images: rows, total });
+
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        return res.json({ error: "server error" }, 500);
     }
 });
 
-router.post('/:id/like',isAuth, async (req, res) => {
+router.post('/api/gallery/:id/like', isAuth, async (req, res) => {
 	const image = req.params.id
-	const userId = req.session.user.id
+	const userId = req.session?.user?.id
 	if(!image) {
-		res.status(404).json("No images")
+		return res.json("No images", 404)
 	}
 	try {
 		const [rows] = await db.execute(
@@ -106,18 +116,21 @@ router.post('/:id/like',isAuth, async (req, res) => {
 			res.json({ success: true, message: 'like added' })	
 		}
 	} catch(err) {
-		res.status(500).json({error : err.message})
+		res.json({ error : err.message }, 500)
 	}
 })
 
-router.post('/:id/comment', isAuth, async (req, res) => {
+router.post('/api/gallery/:id/comment', isAuth, async (req, res) => {
 	const image = req.params.id
-	const userId = req.session.user.id
+	const userId = req.session?.user?.id
 	if(!image) {
-		res.status(404).json("No images")
+		return res.json("No images", 404)
 	}
-	const {content} = req.body
-	if(!content) {return res.status(404).json("No content")}
+    const content = req.body?.content;
+
+    if (!content) {
+        return res.json("No content", 404);
+    }
 	try {
 		await db.execute(
 			'INSERT INTO comments (user_id, image_id, content) VALUES (?, ?, ?)',
@@ -141,9 +154,7 @@ router.post('/:id/comment', isAuth, async (req, res) => {
 		res.json({ success: true, message: 'comment added' })
 
 	} catch(err) {
-		res.status(500).json({error: err.message})
+		res.json({ error: err.message }, 500)
 	}
 
 })
-
-module.exports = router

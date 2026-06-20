@@ -1,38 +1,26 @@
-const express = require('express')
+const router = require('../router')
 const db = require('../database')
 const fs = require('fs')
-const multer = require('multer');
 const sharp = require('sharp')
 const path = require('path')
 const { isAuth } = require('../middlewares/auth')
-const router = express.Router()
+const { uploadSingle } = require('../multipart')
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, './uploads/'),
-    filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname))
-})
-
-const upload = multer({
-    storage,
+const upload = uploadSingle('image', {
     limits: { fileSize: 5 * 1024 * 1024 },
-    fileFilter: (req, file, cb) => {
-        const allowed = ['image/jpeg', 'image/png', 'image/webp']
-        if (!allowed.includes(file.mimetype))
-            return cb(new Error('Only images allowed'))
-        cb(null, true)
-    }
+    allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp']
 })
 
-router.get('/overlays', async (req, res) => {
+router.get('/api/editor/overlays', async (req, res) => {
     try {
         const files = fs.readdirSync('./uploads/overlays')
         res.json({ overlays: files })
     } catch(err) {
-        res.status(500).json({ error: err.message })
+        res.json({ error: err.message }, 500)
     }
 })
 
-router.get('/images', async (req, res) => {
+router.get('/api/editor/images', async (req, res) => {
 	try {
 	  const [rows] = await db.execute(`
 		SELECT 
@@ -56,31 +44,24 @@ router.get('/images', async (req, res) => {
   
 	  res.json(rows);
 	} catch (err) {
-	  res.status(500).json({ error: err.message });
+	  res.json({ error: err.message }, 500);
 	}
-  });
+});
 
-
-
-router.post('/capture', isAuth, (req, res, next) => {
-    upload.single('image')(req, res, (err) => {
-        if (err instanceof multer.MulterError)
-            return res.status(400).json({ error: 'File too large, max 5MB' })
-        else if (err)
-            return res.status(400).json({ error: err.message })
-        next()
-    })
-}, async (req, res) => {
+router.post('/api/editor/capture', isAuth, upload, async (req, res) => {
     if (!req.file)
-        return res.status(404).json({ error: 'file does not exist' })
+        return res.json({ error: 'file does not exist' }, 404)
 
-    const overlay = req.body.overlay
-    const userId = req.session.user.id
+    const overlay = req.body?.overlay
+    const userId = req.session?.user?.id
+
+    if (!overlay)
+        return res.json({ error: 'overlay is required' }, 400)
 
     try {
         const overlays = fs.readdirSync('./uploads/overlays')
         if (!overlays.includes(overlay))
-            return res.status(400).json({ error: 'Invalid overlay' })
+            return res.json({ error: 'Invalid overlay' }, 400)
 
         const outputPath = `./uploads/${Date.now()}_result.png`
 
@@ -105,38 +86,29 @@ router.post('/capture', isAuth, (req, res, next) => {
         res.json({ success: true, filename: outputPath })
 
     } catch (err) {
-        res.status(400).json({ error: err.message })
+        res.json({ error: err.message }, 400)
     }
 })
 
-
-router.delete('/:id', isAuth, async (req, res) => {
-    const imageId = req.params.id
-	const userId = req.session.user.id
-
+router.delete('/api/editor/:id', isAuth, async (req, res) => {
+    const imageId = req.params?.id
+	const userId = req.session?.user?.id
 
 	try {
 		const [rows] = await db.execute('SELECT * FROM images WHERE id = ?', [imageId])
 		const image = rows[0]
 	
 		if (!image)
-			return res.status(404).json({ error: 'Image not found' })
+			return res.json({ error: 'Image not found' }, 404)
 	
 		if (image.user_id !== userId)
-			return res.status(403).json({ error: 'Not your image' })
+			return res.json({ error: 'Not your image' }, 403)
 	
 		fs.unlinkSync(image.filename)
 		await db.execute('DELETE FROM images WHERE id = ?', [imageId]);
-		res.status(200).json("image deleted")
+		res.json("image deleted", 200)
 
 	} catch(err) {
-		res.status(500).send({message : err.message})
+		res.json({ message : err.message }, 500)
 	}
-
 })
-
-
-
-
-
-module.exports = router

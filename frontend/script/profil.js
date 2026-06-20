@@ -1,29 +1,36 @@
 async function logout() {
-    await fetch("/api/auth/logout", { method: "POST" });
-    window.location.href = "/wall.html";
+    await fetch('/api/auth/logout', { method: 'POST' });
+    window.location.href = '/wall.html';
 }
 
 async function loadProfile() {
     const res = await fetch('/api/user/load', { credentials: 'include' });
     if (!res.ok) return window.location.href = '/login.html';
-    const user = await res.json();
 
-    document.getElementById('username').placeholder = user.username;
-    document.getElementById('email').placeholder = user.email;
-    document.getElementById('notify_comments').checked = !!user.notify_comments;
+    const user = await res.json().catch(() => null);
+    if (!user) return;
+
+    const usernameInput = document.getElementById('username');
+    const emailInput = document.getElementById('email');
+    const notifyInput = document.getElementById('notify_comments');
+
+    if (usernameInput) usernameInput.placeholder = user.username || '';
+    if (emailInput) emailInput.placeholder = user.email || '';
+    if (notifyInput) notifyInput.checked = !!user.notify_comments;
 }
 
-document.getElementById('save-btn').addEventListener('click', async () => {
+document.getElementById('save-btn')?.addEventListener('click', async () => {
     const body = {};
-    const username = document.getElementById('username').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value.trim();
-    const notify_comments = document.getElementById('notify_comments').checked;
+    const username = document.getElementById('username')?.value.trim();
+    const email = document.getElementById('email')?.value.trim();
+    const password = document.getElementById('password')?.value.trim();
+    const notify_comments = document.getElementById('notify_comments')?.checked;
+    const msg = document.getElementById('msg');
 
     if (username) body.username = username;
     if (email) body.email = email;
     if (password) body.password = password;
-    body.notify_comments = notify_comments;
+    body.notify_comments = !!notify_comments;
 
     const res = await fetch('/api/user/me', {
         method: 'PATCH',
@@ -32,14 +39,20 @@ document.getElementById('save-btn').addEventListener('click', async () => {
         body: JSON.stringify(body)
     });
 
-    const msg = document.getElementById('msg');
+    if (!msg) return;
+
     if (res.ok) {
-        msg.textContent = 'Sauvegardé !';
+        msg.textContent = 'Saved!';
         msg.style.color = 'green';
-        document.getElementById('password').value = '';
+        const passwordInput = document.getElementById('password');
+        if (passwordInput) passwordInput.value = '';
     } else {
-        const err = await res.json();
-        msg.textContent = 'Erreur: ' + err.error;
+        try {
+            const err = await res.json();
+            msg.textContent = 'Error: ' + (err.error || 'Unable to save changes.');
+        } catch {
+            msg.textContent = 'Error: Unable to save changes.';
+        }
         msg.style.color = 'red';
     }
 });

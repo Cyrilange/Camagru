@@ -1,10 +1,7 @@
 async function logout() {
-    try {
-        const res = await fetch("/api/auth/logout", { method: "POST" });
-        if (!res.ok) throw new Error("Logout failed");
-        window.location.href = "/wall.html";
-    } catch (err) {
-        console.error(err);
+    const res = await fetch('/api/auth/logout', { method: 'POST' });
+    if (res.ok) {
+        window.location.href = '/wall.html';
     }
 }
 window.logout = logout;
@@ -54,21 +51,27 @@ window.deletePhoto = deletePhoto;
 
 
 async function loadPhotos(page = 1) {
-    try {
-        const res = await fetch(`/api/gallery/me?page=${page}&limit=${perPage}`, {
-            credentials: 'include'
-        });
-        const data = await res.json();
-        photos = data.images || [];
-        const total = data.total || 0;
-        renderPhotos();
-        document.getElementById('nextPage').disabled = (page * perPage >= total);
-        document.getElementById('prevPage').disabled = (page === 1);
-        document.getElementById('pageInfo').textContent = total > 0
+    const res = await fetch(`/api/gallery/me?page=${page}&limit=${perPage}`, {
+        credentials: 'include'
+    });
+
+    if (!res.ok) return;
+
+    const data = await res.json().catch(() => ({}));
+    photos = data.images || [];
+    const total = data.total || 0;
+    renderPhotos();
+
+    const nextBtn = document.getElementById('nextPage');
+    const prevBtn = document.getElementById('prevPage');
+    const pageInfo = document.getElementById('pageInfo');
+
+    if (nextBtn) nextBtn.disabled = (page * perPage >= total);
+    if (prevBtn) prevBtn.disabled = (page === 1);
+    if (pageInfo) {
+        pageInfo.textContent = total > 0
             ? `Page ${page} / ${Math.ceil(total / perPage)}`
             : '0 photo';
-    } catch (err) {
-        console.error('loadPhotos error:', err);
     }
 }
 
@@ -126,7 +129,6 @@ async function startCamera() {
         video.style.display = 'block';
         previewImg.style.display = 'none';
     } catch (err) {
-        console.warn('Webcam undisponible');
         video.style.display = 'none';
     }
 }
@@ -198,4 +200,4 @@ captureBtn.addEventListener('click', async () => {
 
 loadOverlays();
 startCamera();
-loadPhotos(1);
+loadPhotos(1);copilot

@@ -8,6 +8,9 @@ CREATE TABLE users (
     reset_token VARCHAR(64) DEFAULT NULL,
     notify_comments TINYINT(1) NOT NULL DEFAULT 1
 );
+
+ALTER TABLE users ADD COLUMN reset_token_expires DATETIME;
+
 CREATE TABLE images (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
